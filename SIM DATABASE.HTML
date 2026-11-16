@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
+  <title>Pair · WhatsApp Bot</title>
+  <!-- Google Fonts for premium typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
+  <!-- Font Awesome for icons (premium feel) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    /* CONFIG block is at the very top of the <script> below. All CSS uses variables from it via JS. */
+    /* Base reset & variables (brand-agnostic) */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --bg-deep: #0b0b12;
+      --bg-soft: #12121c;
+      --card-bg: rgba(22, 22, 35, 0.85);
+      --card-border: rgba(255, 255, 255, 0.06);
+      --text-primary: #f0eef6;
+      --text-secondary: #a9a4b8;
+      --accent: #d46b8c; /* romantic rose */
+      --accent-glow: #f08aac;
+      --accent-soft: rgba(212, 107, 140, 0.15);
+      --success: #6fcf97;
+      --danger: #f28b82;
+      --radius-lg: 28px;
+      --radius-md: 20px;
+      --radius-sm: 16px;
+      --shadow-card: 0 25px 50px -12px rgba(0, 0, 0, 0.8);
+      --font-main: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      --transition: all 0.25s cubic-bezier(0.2, 0.9, 0.4, 1);
+    }
+
+    body {
+      font-family: var(--font-main);
+      background: radial-gradient(circle at 20% 10%, #1a1420, #0b0b12 80%);
+      color: var(--text-primary);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 18px 16px 30px;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      overflow-x: hidden;
+    }
+
+    /* subtle romantic grain / glow */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(circle at 80% 20%, rgba(212, 107, 140, 0.08), transparent 60%),
+                  radial-gradient(circle at 30% 80%, rgba(180, 90, 140, 0.06), transparent 50%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .app-wrapper {
+      width: 100%;
+      max-width: 440px;
+      position: relative;
+      z-index: 2;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    /* ----- HEADER / BRAND ----- */
+    .brand-header {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: 12px;
+      padding: 6px 0 2px;
+    }
+
+    .brand-banner-frame {
+      width: 100%;
+      max-width: 340px;
+      border-radius: 28px;
+      overflow: hidden;
+      box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255, 255, 255, 0.04);
+      aspect-ratio: 16 / 7;
+      background: #1b1b28;
+      transition: var(--transition);
+      /* subtle romantic inner glow */
+      border: 1px solid rgba(212, 107, 140, 0.2);
+    }
+
+    .brand-banner-frame img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: transform 0.5s ease;
+    }
+
+    .brand-banner-frame:hover img {
+      transform: scale(1.02);
+    }
+
+    .brand-name {
+      font-size: 2.1rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      background: linear-gradient(135deg, #ffffff 20%, #f0c0d0 80%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      line-height: 1.2;
+      margin-top: 4px;
+      text-shadow: 0 0 30px rgba(212, 107, 140, 0.3);
+    }
+
+    .owner-line {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+      background: rgba(255, 255, 255, 0.03);
+      padding: 6px 18px;
+      border-radius: 40px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(6px);
+    }
+
+    .owner-line i {
+      color: var(--accent);
+      font-size: 0.8rem;
+    }
+
+    .owner-name {
+      font-weight: 600;
+      color: #e8d9e8;
+    }
+
+    /* channel button */
+    .channel-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: linear-gradient(145deg, rgba(212, 107, 140, 0.18), rgba(212, 107, 140, 0.06));
+      border: 1px solid rgba(212, 107, 140, 0.3);
+      color: #f2d3e0;
+      padding: 10px 24px;
+      border-radius: 60px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      text-decoration: none;
+      transition: var(--transition);
+      backdrop-filter: blur(4px);
+      box-shadow: 0 8px 20px -8px rgba(0, 0, 0, 0.6);
+    }
+
+    .channel-btn i {
+      color: var(--accent-glow);
+      font-size: 1rem;
+    }
+
+    .channel-btn:hover {
+      background: rgba(212, 107, 140, 0.25);
+      border-color: var(--accent);
+      transform: translateY(-2px);
+      box-shadow: 0 14px 26px -10px rgba(212, 107, 140, 0.4);
+    }
+
+    /* ----- STATUS & STATS ROW (small) ----- */
+    .status-stats-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      gap: 10px 18px;
+      background: rgba(10, 10, 16, 0.6);
+      backdrop-filter: blur(8px);
+      padding: 12px 18px;
+      border-radius: 60px;
+      border: 1px solid var(--card-border);
+      box-shadow: 0 8px 18px -8px #00000055;
+      font-size: 0.8rem;
+      font-weight: 500;
+      color: var(--text-secondary);
+      transition: var(--transition);
+    }
+
+    .status-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
+    }
+
+    .status-dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: #888;
+      box-shadow: 0 0 8px currentColor;
+    }
+
+    .status-dot.online {
+      background: var(--success);
+      box-shadow: 0 0 10px var(--success);
+    }
+
+    .status-dot.offline {
+      background: var(--danger);
+      box-shadow: 0 0 8px var(--danger);
+    }
+
+    .stat-value {
+      font-weight: 700;
+      color: #ede7f5;
+      margin-left: 2px;
+    }
+
+    .stat-divider {
+      color: rgba(255, 255, 255, 0.12);
+      font-size: 0.7rem;
+    }
+
+    /* ----- MAIN CARD / PAIR PANEL ----- */
+    .pair-card {
+      background: var(--card-bg);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      border-radius: var(--radius-lg);
+      padding: 28px 22px 26px;
+      border: 1px solid var(--card-border);
+      box-shadow: var(--shadow-card), inset 0 1px 0 rgba(255, 255, 255, 0.03);
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      transition: var(--transition);
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* romantic soft glow inside card */
+    .pair-card::before {
+      content: '';
+      position: absolute;
+      top: -40%;
+      left: -20%;
+      width: 140%;
+      height: 100%;
+      background: radial-gradient(ellipse at 30% 10%, rgba(212, 107, 140, 0.12), transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .pair-card > * {
+      position: relative;
+      z-index: 1;
+    }
+
+    .pair-card h2 {
+      font-size: 1.3rem;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: #f5eaf3;
+      margin-bottom: 4px;
+    }
+
+    .pair-card h2 i {
+      color: var(--accent);
+      font-size: 1.2rem;
+    }
+
+    /* input group */
+    .input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .input-group label {
+      font-size: 0.8rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: #b7a9c2;
+      padding-left: 6px;
+    }
+
+    .phone-input-row {
+      display: flex;
+      gap: 10px;
+      width: 100%;
+    }
+
+    .country-code-wrapper {
+      flex: 0 0 92px;
+      position: relative;
+    }
+
+    .country-code-wrapper::before {
+      content: '+';
+      position: absolute;
+      left: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--accent);
+      font-weight: 600;
+      font-size: 1rem;
+      z-index: 2;
+      pointer-events: none;
+    }
+
+    .country-code-wrapper input {
+      padding-left: 32px !important;
+    }
+
+    .phone-input-row input {
+      width: 100%;
+      background: rgba(10, 10, 18, 0.7);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: var(--radius-sm);
+      padding: 16px 18px;
+      font-size: 1.1rem;
+      font-weight: 500;
+      color: #fff;
+      outline: none;
+      transition: var(--transition);
+      font-family: var(--font-main);
+      letter-spacing: 0.5px;
+      backdrop-filter: blur(4px);
+      -webkit-appearance: none;
+    }
+
+    .phone-input-row input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-soft), 0 0 20px -6px var(--accent);
+    }
+
+    .phone-input-row input::placeholder {
+      color: #5a5266;
+      font-weight: 400;
+      letter-spacing: 0.2px;
+    }
+
+    /* button */
+    .btn-primary {
+      width: 100%;
+      background: linear-gradient(135deg, #b84e6e, #d46b8c 60%, #e28aa8);
+      border: none;
+      border-radius: 60px;
+      padding: 18px 24px;
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: 0.3px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      transition: var(--transition);
+      box-shadow: 0 12px 28px -8px rgba(212, 107, 140, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+      font-family: var(--font-main);
+      margin-top: 6px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn-primary i {
+      font-size: 1.1rem;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 18px 36px -10px rgba(212, 107, 140, 0.7);
+      background: linear-gradient(135deg, #c45a7a, #dc7b9a 60%, #ec9ab8);
+    }
+
+    .btn-primary:active:not(:disabled) {
+      transform: translateY(0px);
+      box-shadow: 0 8px 20px -6px rgba(212, 107, 140, 0.5);
+    }
+
+    .btn-primary:disabled {
+      opacity: 0.65;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: 0 8px 18px -8px rgba(0, 0, 0, 0.4);
+      filter: grayscale(20%);
+    }
+
+    /* pairing result box */
+    .pair-result {
+      background: rgba(212, 107, 140, 0.06);
+      border: 1px solid rgba(212, 107, 140, 0.2);
+      border-radius: var(--radius-md);
+      padding: 22px 18px;
+      display: none; /* hidden until code */
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      animation: fadeSlide 0.35s ease;
+      margin-top: 6px;
+      backdrop-filter: blur(8px);
+    }
+
+    .pair-result.show {
+      display: flex;
+    }
+
+    @keyframes fadeSlide {
+      0% { opacity: 0; transform: translateY(12px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+
+    .pair-code-label {
+      font-size: 0.8rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #cbb2c7;
+      font-weight: 500;
+    }
+
+    .pair-code-value {
+      font-size: 2.6rem;
+      font-weight: 800;
+      letter-spacing: 4px;
+      color: #ffffff;
+      text-shadow: 0 0 30px rgba(212, 107, 140, 0.7), 0 0 10px rgba(255, 255, 255, 0.2);
+      font-family: 'Inter', monospace;
+      line-height: 1.2;
+      word-break: break-all;
+      text-align: center;
+    }
+
+    .pair-meta {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 18px;
+      flex-wrap: wrap;
+      font-size: 0.9rem;
+      color: #cdb9c9;
+      margin-top: 4px;
+    }
+
+    .timer-badge {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(0, 0, 0, 0.35);
+      padding: 6px 16px;
+      border-radius: 40px;
+      font-weight: 600;
+      color: var(--accent-glow);
+      border: 1px solid rgba(212, 107, 140, 0.25);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .copy-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: #f0e4ef;
+      padding: 8px 20px;
+      border-radius: 40px;
+      font-weight: 500;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: var(--transition);
+      font-family: var(--font-main);
+      backdrop-filter: blur(4px);
+    }
+
+    .copy-btn i {
+      color: var(--accent-glow);
+    }
+
+    .copy-btn:hover {
+      background: rgba(212, 107, 140, 0.15);
+      border-color: rgba(212, 107, 140, 0.4);
+      transform: scale(1.02);
+    }
+
+    .copy-btn:active {
+      transform: scale(0.98);
+    }
+
+    /* toast */
+    .toast-container {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: calc(100% - 32px);
+      max-width: 400px;
+      z-index: 1000;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      pointer-events: none;
+    }
+
+    .toast {
+      background: rgba(20, 18, 28, 0.96);
+      backdrop-filter: blur(18px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-left: 4px solid var(--accent);
+      color: #f2ecf5;
+      padding: 16px 20px;
+      border-radius: 18px;
+      box-shadow: 0 20px 40px -10px #000000aa;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      font-size: 0.92rem;
+      font-weight: 500;
+      animation: toastIn 0.3s ease;
+      pointer-events: auto;
+      line-height: 1.4;
+    }
+
+    .toast i {
+      font-size: 1.2rem;
+      color: var(--accent);
+      flex-shrink: 0;
+    }
+
+    .toast.error {
+      border-left-color: var(--danger);
+    }
+
+    .toast.error i {
+      color: var(--danger);
+    }
+
+    .toast.success {
+      border-left-color: var(--success);
+    }
+
+    .toast.success i {
+      color: var(--success);
+    }
+
+    @keyframes toastIn {
+      0% { opacity: 0; transform: translateY(16px) scale(0.96); }
+      100% { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .toast.hide {
+      animation: toastOut 0.25s ease forwards;
+    }
+
+    @keyframes toastOut {
+      0% { opacity: 1; transform: translateY(0); }
+      100% { opacity: 0; transform: translateY(10px); }
+    }
+
+    /* small helper */
+    .text-muted {
+      color: var(--text-secondary);
+      font-size: 0.78rem;
+      text-align: center;
+      margin-top: -6px;
+    }
+
+    /* Responsive fine-tuning */
+    @media (max-width: 380px) {
+      .brand-name { font-size: 1.7rem; }
+      .pair-code-value { font-size: 2rem; letter-spacing: 2px; }
+      .pair-card { padding: 22px 16px; }
+      .phone-input-row input { padding: 14px 14px; font-size: 1rem; }
+      .country-code-wrapper { flex: 0 0 82px; }
+      .country-code-wrapper input { padding-left: 28px !important; }
+      .status-stats-row { gap: 8px 12px; padding: 10px 14px; font-size: 0.75rem; }
+    }
+
+    /* hide scrollbar but keep function */
+    ::-webkit-scrollbar { width: 0; background: transparent; }
+  </style>
+</head>
+<body>
+
+  <!-- ========== CONFIG BLOCK (at the very top of the file) ========== -->
+  <script>
+    const CONFIG = {
+      brandName: "Aqeel Malik",
+      bannerImageUrl: "https://i.postimg.cc/3xJKDg6v/IMG-20260102-WA0041.jpg",
+      ownerNumber: "923127493393",
+      ownerName: "ALOVER KING",
+      channelLink: "https://whatsapp.com/channel/0029VbCpRhM8KMqcDQjjBo2y",
+      backendUrl: "https://web-production-4abfe.up.railway.app"
+    };
+  </script>
+  <!-- ========== END CONFIG BLOCK ========== -->
+
+  <div class="app-wrapper">
+
+    <!-- BRAND HEADER (all values from CONFIG, populated by JS) -->
+    <header class="brand-header">
+      <div class="brand-banner-frame" id="bannerFrame">
+        <!-- img src will be set by JS from CONFIG.bannerImageUrl -->
+        <img id="brandBanner" src="" alt="Brand Banner" loading="eager">
+      </div>
+      <h1 class="brand-name" id="brandNameDisplay">Brand</h1>
+      <div class="owner-line">
+        <i class="fas fa-crown"></i>
+        <span>Owner: <span class="owner-name" id="ownerNameDisplay">Owner</span></span>
+      </div>
+      <a href="#" id="channelLinkBtn" target="_blank" rel="noopener noreferrer" class="channel-btn">
+        <i class="fab fa-whatsapp"></i> Join Channel
+      </a>
+    </header>
+
+    <!-- STATUS & STATS (live) -->
+    <div class="status-stats-row" id="statusStatsRow">
+      <div class="status-item" id="healthStatus">
+        <span class="status-dot" id="statusDot"></span>
+        <span id="statusText">Checking...</span>
+      </div>
+      <span class="stat-divider">|</span>
+      <div class="status-item">
+        <i class="fas fa-users" style="color: var(--accent); font-size: 0.75rem;"></i>
+        <span>Total <span class="stat-value" id="statTotalUsers">—</span></span>
+      </div>
+      <div class="status-item">
+        <i class="fas fa-wifi" style="color: var(--accent); font-size: 0.75rem;"></i>
+        <span>Active <span class="stat-value" id="statActiveSessions">—</span></span>
+      </div>
+      <div class="status-item">
+        <i class="fas fa-calendar-day" style="color: var(--accent); font-size: 0.75rem;"></i>
+        <span>New <span class="stat-value" id="statDailyNew">—</span></span>
+      </div>
+      <div class="status-item">
+        <i class="fas fa-link" style="color: var(--accent); font-size: 0.75rem;"></i>
+        <span>Paired <span class="stat-value" id="statTotalPaired">—</span></span>
+      </div>
+    </div>
+
+    <!-- PAIR CARD -->
+    <div class="pair-card">
+      <h2><i class="fas fa-link"></i> Pair your WhatsApp</h2>
+
+      <div class="input-group">
+        <label>Phone number</label>
+        <div class="phone-input-row">
+          <div class="country-code-wrapper">
+            <input type="tel" id="countryCode" placeholder="92" value="92" maxlength="5" inputmode="numeric" aria-label="Country code">
+          </div>
+          <input type="tel" id="phoneNumber" placeholder="3001234567" inputmode="numeric" aria-label="Phone number">
+        </div>
+      </div>
+
+      <button class="btn-primary" id="pairButton">
+        <i class="fas fa-bolt"></i> Get Pairing Code
+      </button>
+
+      <!-- Pair result (code, timer, copy) -->
+      <div class="pair-result" id="pairResult">
+        <div class="pair-code-label">Your pairing code</div>
+        <div class="pair-code-value" id="pairCodeDisplay">----</div>
+        <div class="pair-meta">
+          <div class="timer-badge" id="timerBadge">
+            <i class="fas fa-hourglass-half"></i> <span id="timerDisplay">--:--</span>
+          </div>
+          <button class="copy-btn" id="copyCodeBtn">
+            <i class="fas fa-copy"></i> Copy
+          </button>
+        </div>
+      </div>
+
+      <p class="text-muted">Link your number to the bot. Code expires in 2 minutes.</p>
+    </div>
+
+  </div>
+
+  <!-- toast container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- ========== MAIN SCRIPT (all logic, uses CONFIG) ========== -->
+  <script>
+    (function() {
+      // ------ 1. POPULATE BRAND FROM CONFIG ------
+      const brandName = CONFIG.brandName || 'WhatsApp Bot';
+      const bannerUrl = CONFIG.bannerImageUrl || '';
+      const ownerName = CONFIG.ownerName || 'Owner';
+      const ownerNum = CONFIG.ownerNumber || '';
+      const channelLink = CONFIG.channelLink || '#';
+      const backend = CONFIG.backendUrl;
+
+      document.getElementById('brandNameDisplay').textContent = brandName;
+      document.getElementById('ownerNameDisplay').textContent = ownerName;
+      document.getElementById('channelLinkBtn').href = channelLink;
+
+      const bannerImg = document.getElementById('brandBanner');
+      if (bannerUrl && bannerUrl.trim() !== '') {
+        bannerImg.src = bannerUrl;
+        bannerImg.alt = brandNa
+
+
+                    
